@@ -1,45 +1,26 @@
-    <!-- ДЕЛО №1 -->
-    <div class="case-card">
-      <div class="card-meta">
-        <span class="case-number">Дело №1</span>
-        <span class="case-status">Доступно</span>
-      </div>
-      <h2 class="case-title">Тайна Чёрной Лилии</h2>
-      <div class="case-epoch">Российская империя • Усадьба Воронцовых</div>
-      <p class="case-desc">
-        Дело об убийстве барона Воронцова. Барон Алексей мёртв, а урядник готовится подписать приказ о казни знахарки Елены. У вас 16 часов, чтобы найти истину.
-      </p>
-      <a href="https://detective-games.github.io/black-lily/" class="btn-play" onclick="triggerHaptic()">
-        <span>Начать расследование</span>
-        <span>▶</span>
-      </a>
-    </div>
-Полный обновлённый код index.html (для вставки в репозиторий detective-games.github.io):
-html
 <!DOCTYPE html>
 <html lang="ru">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Карточный Детектив — Архив расследований</title>
-  <!-- MAX Bridge SDK (мессенджер MAX) -->
+  <!-- MAX Bridge SDK (мессенджер МАКС) -->
   <script src="https://st.max.ru/js/max-web-app.js"></script>
   <!-- Telegram WebApp SDK -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
     :root {
-      --bg: #121316;
+      --bg-color: #121316;
       --card-bg: #1c1e24;
-      --card-border: #2f3440;
-      --gold: #d4af37;
-      --gold-light: #f3e5ab;
-      --text-main: #f0f1f5;
-      --text-muted: #9aa0ad;
-      --btn-bg: linear-gradient(135deg, #c29b38 0%, #8c681b 100%);
-      --btn-text: #ffffff;
-      --locked-bg: #262933;
-      --locked-text: #6b7280;
+      --card-border: #2c2f38;
+      --accent-gold: #e2b768;
+      --accent-gold-hover: #f3ca7e;
+      --text-main: #f0f1f3;
+      --text-muted: #9aa0a6;
+      --badge-bg: rgba(226, 183, 104, 0.15);
+      --badge-border: rgba(226, 183, 104, 0.35);
     }
+
     * {
       box-sizing: border-box;
       margin: 0;
@@ -47,167 +28,179 @@ html
       -webkit-tap-highlight-color: transparent;
       user-select: none;
     }
+
     body {
-      background-color: var(--bg);
-      color: var(--text-main);
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg-color);
+      color: var(--text-main);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 20px 16px 40px;
+      padding: 20px 16px 40px 16px;
+      overflow-x: hidden;
     }
-    .container {
+
+    .header {
+      text-align: center;
+      margin-bottom: 24px;
+      max-width: 500px;
+    }
+
+    .header-logo {
+      font-size: 32px;
+      margin-bottom: 6px;
+      filter: drop-shadow(0 2px 8px rgba(226, 183, 104, 0.4));
+    }
+
+    .header h1 {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      color: var(--accent-gold);
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .header p {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    .cases-list {
       width: 100%;
       max-width: 480px;
       display: flex;
       flex-direction: column;
       gap: 16px;
     }
-    /* Шапка */
-    .header {
-      text-align: center;
-      padding: 12px 0 8px;
-    }
-    .badge-top {
-      display: inline-block;
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      color: var(--gold);
-      margin-bottom: 6px;
-    }
-    .title {
-      font-size: 26px;
-      font-weight: 800;
-      letter-spacing: 0.5px;
-      color: var(--text-main);
-      margin-bottom: 4px;
-    }
-    .subtitle {
-      font-size: 14px;
-      color: var(--text-muted);
-    }
-    /* Карточки дел */
+
     .case-card {
       background: var(--card-bg);
       border: 1px solid var(--card-border);
-      border-radius: 16px;
-      padding: 20px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+      border-radius: 14px;
+      padding: 16px;
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+      transition: transform 0.15s ease, border-color 0.2s ease;
       position: relative;
       overflow: hidden;
-      transition: transform 0.15s ease, border-color 0.2s ease;
     }
+
     .case-card:active {
       transform: scale(0.985);
+      border-color: var(--accent-gold);
     }
-    .case-card::before {
-      content: "";
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 4px;
-      height: 100%;
-      background: var(--gold);
-    }
+
     .card-meta {
       display: flex;
-      justify-content: space-between;
       align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
     }
+
     .case-number {
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 1px;
-      color: var(--gold);
+      color: var(--accent-gold);
+      background: var(--badge-bg);
+      border: 1px solid var(--badge-border);
+      padding: 3px 8px;
+      border-radius: 6px;
     }
+
     .case-status {
       font-size: 11px;
+      color: #6bd475;
       font-weight: 600;
-      padding: 3px 8px;
-      border-radius: 8px;
-      background: rgba(212, 175, 55, 0.15);
-      color: var(--gold-light);
     }
+
     .case-title {
-      font-size: 20px;
+      font-size: 18px;
       font-weight: 700;
       color: #ffffff;
-      line-height: 1.25;
+      margin-bottom: 6px;
+      line-height: 1.3;
     }
+
     .case-epoch {
       font-size: 12px;
+      color: var(--accent-gold);
+      margin-bottom: 8px;
       font-weight: 500;
-      color: #d19a3b;
-      margin-top: -6px;
     }
+
     .case-desc {
-      font-size: 13.5px;
-      line-height: 1.45;
+      font-size: 13px;
       color: var(--text-muted);
+      line-height: 1.45;
+      margin-bottom: 14px;
     }
+
     .btn-play {
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 8px;
-      width: 100%;
-      padding: 13px 16px;
-      border-radius: 12px;
-      border: none;
-      background: var(--btn-bg);
-      color: var(--btn-text);
-      font-size: 15px;
+      background: linear-gradient(135deg, var(--accent-gold) 0%, #c49944 100%);
+      color: #121316;
+      font-size: 14px;
       font-weight: 700;
-      letter-spacing: 0.3px;
-      cursor: pointer;
       text-decoration: none;
-      box-shadow: 0 4px 14px rgba(194, 155, 56, 0.3);
-      transition: opacity 0.15s;
+      padding: 12px 18px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(226, 183, 104, 0.25);
+      transition: opacity 0.2s ease;
     }
+
     .btn-play:active {
       opacity: 0.85;
     }
-    /* Заблокированное дело */
-    .case-card.locked::before {
-      background: #4b5563;
-    }
+
+    /* Карточка дела в разработке */
     .case-card.locked {
-      opacity: 0.75;
-      border-color: #262933;
+      opacity: 0.65;
+      border: 1px dashed #3a3e4a;
     }
+
+    .case-card.locked .case-status {
+      color: #e2a84b;
+    }
+
     .btn-locked {
-      background: var(--locked-bg);
-      color: var(--locked-text);
-      cursor: not-allowed;
+      background: #2a2d36;
+      color: #7b808a;
       box-shadow: none;
+      cursor: not-allowed;
     }
+
     .footer {
+      margin-top: 28px;
+      font-size: 11px;
+      color: #636875;
       text-align: center;
-      font-size: 12px;
-      color: #606775;
-      margin-top: 8px;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="header">
-      <div class="badge-top">АРХИВ РАССЛЕДОВАНИЙ</div>
-      <h1 class="title">Карточный Детектив</h1>
-      <p class="subtitle">Выберите дело и раскройте преступление:</p>
-    </div>
+
+  <header class="header">
+    <div class="header-logo">🔍📜</div>
+    <h1>Архив Расследований</h1>
+    <p>Каждое дело — отдельная история. Выбирайте расследование, опрашивайте свидетелей и найдите виновного.</p>
+  </header>
+
+  <main class="cases-list">
+
     <!-- ДЕЛО №1 -->
     <div class="case-card">
       <div class="card-meta">
         <span class="case-number">Дело №1</span>
-        <span class="case-status">Доступно</span>
+        <span class="case-status">● Доступно</span>
       </div>
       <h2 class="case-title">Тайна Чёрной Лилии</h2>
       <div class="case-epoch">Российская империя • Усадьба Воронцовых</div>
@@ -219,63 +212,69 @@ html
         <span>▶</span>
       </a>
     </div>
+
     <!-- ДЕЛО №2 -->
     <div class="case-card">
       <div class="card-meta">
         <span class="case-number">Дело №2</span>
-        <span class="case-status">Доступно</span>
+        <span class="case-status">● Доступно</span>
       </div>
       <h2 class="case-title">Последний выстрел</h2>
-      <div class="case-epoch">Чикаго, 1928 год • Эпоха сухого закона</div>
+      <div class="case-epoch">Чикаго, 1928 год • Отель «Астория»</div>
       <p class="case-desc">
-        На складе у реки нашли тело Томми «Два пистолета» Мальвано — правой руки местного гангстера. Полиция спешит закрыть дело как самоубийство, но загадочная метка «4» указывает на заговор мафии.
+        В закрытом номере застрелен босс мафии Томми Мальвано. На зеркале кровью выведена цифра «4». Разгадайте заговор кланов до рассвета.
       </p>
       <a href="https://detective-games.github.io/delo2/" class="btn-play" onclick="triggerHaptic()">
         <span>Начать расследование</span>
         <span>▶</span>
       </a>
     </div>
-    <!-- ДЕЛО №3 (В разработке) -->
+
+    <!-- ДЕЛО №3 (СКОРО) -->
     <div class="case-card locked">
       <div class="card-meta">
         <span class="case-number">Дело №3</span>
-        <span class="case-status">Премьера в декабре</span>
+        <span class="case-status">Скоро</span>
       </div>
-      <h2 class="case-title">Новое дело</h2>
-      <div class="case-epoch">В разработке ⏳</div>
+      <h2 class="case-title">Призрак старого маяка</h2>
+      <div class="case-epoch">Туманный Альбион • 1895 год</div>
       <p class="case-desc">
-        Каждый месяц в архиве появляется новое расследование. Новая эпоха, запутанные улики и неожиданная развязка уже готовятся.
+        Хранитель маяка исчез посреди шторма, а огонь погас. Новое расследование выйдет в следующем месяце.
       </p>
-      <button class="btn-play btn-locked" disabled>
-        <span>Скоро</span>
-        <span>🔒</span>
-      </button>
+      <div class="btn-play btn-locked">
+        <span>В разработке</span>
+      </div>
     </div>
-    <div class="footer">
-      Архив пополняется каждый месяц • Карточный Детектив
-    </div>
-  </div>
+
+  </main>
+
+  <footer class="footer">
+    Карточный Детектив • Обновление каталога каждый месяц
+  </footer>
+
   <script>
-    // Инициализация мостов MAX Bridge и Telegram
-    const app = window.WebApp || (window.Telegram && window.Telegram.WebApp);
-    if (app) {
-      try {
-        if (typeof app.ready === 'function') app.ready();
-        if (typeof app.expand === 'function') app.expand();
-        if (typeof app.lockOrientation === 'function') {
-          try { app.lockOrientation('portrait'); } catch(e) {}
-        }
-      } catch (e) {
-        console.warn('WebApp init:', e);
+    // Инициализация мостов МАКС и Telegram
+    try {
+      if (window.WebApp) {
+        window.WebApp.ready();
+        if (typeof window.WebApp.expand === 'function') window.WebApp.expand();
       }
+      if (window.Telegram && window.Telegram.WebApp) {
+        window.Telegram.WebApp.ready();
+        window.Telegram.WebApp.expand();
+      }
+    } catch (e) {
+      console.warn("WebApp init notice:", e);
     }
-    // Легкий виброотклик при клике на дело
+
     function triggerHaptic() {
       try {
-        if (app && app.HapticFeedback && typeof app.HapticFeedback.impactOccurred === 'function') {
-          app.HapticFeedback.impactOccurred('medium');
+        if (window.WebApp && window.WebApp.HapticFeedback) {
+          window.WebApp.HapticFeedback.impactOccurred('medium');
+        } else if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.HapticFeedback) {
+          window.Telegram.WebApp.HapticFeedback.impactOccurred('medium');
         }
-      } catch(e) {}
+      } catch (err) {}
     }
   </script>
 </body>
