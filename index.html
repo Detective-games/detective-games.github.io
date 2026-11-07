@@ -1,12 +1,264 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
   <meta charset="utf-8">
-  <title>Карточный Детектив</title>
-  <meta http-equiv="refresh" content="0; url=https://detective-games.github.io/black-lily/">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Карточный Детектив — Архив расследований</title>
+  <!-- MAX Bridge SDK (мессенджер MAX) -->
+  <script src="https://st.max.ru/js/max-web-app.js"></script>
+  <!-- Telegram WebApp SDK -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    :root {
+      --bg: #121316;
+      --card-bg: #1c1e24;
+      --card-border: #2f3440;
+      --gold: #d4af37;
+      --gold-light: #f3e5ab;
+      --text-main: #f0f1f5;
+      --text-muted: #9aa0ad;
+      --btn-bg: linear-gradient(135deg, #c29b38 0%, #8c681b 100%);
+      --btn-text: #ffffff;
+      --locked-bg: #262933;
+      --locked-text: #6b7280;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+    body {
+      background-color: var(--bg);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px 16px 40px;
+    }
+    .container {
+      width: 100%;
+      max-width: 480px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    /* Шапка */
+    .header {
+      text-align: center;
+      padding: 12px 0 8px;
+    }
+    .badge-top {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 6px;
+    }
+    .title {
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      color: var(--text-main);
+      margin-bottom: 4px;
+    }
+    .subtitle {
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+    /* Карточки дел */
+    .case-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.15s ease, border-color 0.2s ease;
+    }
+    .case-card:active {
+      transform: scale(0.985);
+    }
+    .case-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+      background: var(--gold);
+    }
+    .card-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .case-number {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--gold);
+    }
+    .case-status {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 8px;
+      background: rgba(212, 175, 55, 0.15);
+      color: var(--gold-light);
+    }
+    .case-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #ffffff;
+      line-height: 1.25;
+    }
+    .case-epoch {
+      font-size: 12px;
+      font-weight: 500;
+      color: #d19a3b;
+      margin-top: -6px;
+    }
+    .case-desc {
+      font-size: 13.5px;
+      line-height: 1.45;
+      color: var(--text-muted);
+    }
+    .btn-play {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 13px 16px;
+      border-radius: 12px;
+      border: none;
+      background: var(--btn-bg);
+      color: var(--btn-text);
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      cursor: pointer;
+      text-decoration: none;
+      box-shadow: 0 4px 14px rgba(194, 155, 56, 0.3);
+      transition: opacity 0.15s;
+    }
+    .btn-play:active {
+      opacity: 0.85;
+    }
+    /* Заблокированное дело */
+    .case-card.locked::before {
+      background: #4b5563;
+    }
+    .case-card.locked {
+      opacity: 0.75;
+      border-color: #262933;
+    }
+    .btn-locked {
+      background: var(--locked-bg);
+      color: var(--locked-text);
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+    .footer {
+      text-align: center;
+      font-size: 12px;
+      color: #606775;
+      margin-top: 8px;
+    }
+  </style>
 </head>
 <body>
-  <h1>Карточный Детектив</h1>
-  <p><a href="https://detective-games.github.io/black-lily/">Играть в Дело №1</a></p>
+  <div class="container">
+    <div class="header">
+      <div class="badge-top">АРХИВ РАССЛЕДОВАНИЙ</div>
+      <h1 class="title">Карточный Детектив</h1>
+      <p class="subtitle">Выберите дело и раскройте преступление:</p>
+    </div>
+    <!-- ДЕЛО №1 -->
+    <div class="case-card">
+      <div class="card-meta">
+        <span class="case-number">Дело №1</span>
+        <span class="case-status">Доступно</span>
+      </div>
+      <h2 class="case-title">Тайна особняка Блэквуд</h2>
+      <div class="case-epoch">Англия • Викторианская эпоха</div>
+      <p class="case-desc">
+        В загородном поместье похищена фамильная реликвия, а барон найден мёртвым. Опросите прислугу, сопоставьте улики и найдите настоящего убийцу.
+      </p>
+      <a href="https://detective-games.github.io/black-lily/" class="btn-play" onclick="triggerHaptic()">
+        <span>Начать расследование</span>
+        <span>▶</span>
+      </a>
+    </div>
+    <!-- ДЕЛО №2 -->
+    <div class="case-card">
+      <div class="card-meta">
+        <span class="case-number">Дело №2</span>
+        <span class="case-status">Доступно</span>
+      </div>
+      <h2 class="case-title">Последний выстрел</h2>
+      <div class="case-epoch">Чикаго, 1928 год • Эпоха сухого закона</div>
+      <p class="case-desc">
+        Томми Мальвано убит в клубе Red Jazz. Полиция закрыла дело как самоубийство, но загадочная метка «4» указывает на заговор мафии.
+      </p>
+      <a href="https://detective-games.github.io/delo2/" class="btn-play" onclick="triggerHaptic()">
+        <span>Начать расследование</span>
+        <span>▶</span>
+      </a>
+    </div>
+    <!-- ДЕЛО №3 (В разработке) -->
+    <div class="case-card locked">
+      <div class="card-meta">
+        <span class="case-number">Дело №3</span>
+        <span class="case-status">Премьера в декабре</span>
+      </div>
+      <h2 class="case-title">Новое дело</h2>
+      <div class="case-epoch">В разработке ⏳</div>
+      <p class="case-desc">
+        Каждый месяц в архиве появляется новое расследование. Новая эпоха, запутанные улики и неожиданная развязка уже готовятся.
+      </p>
+      <button class="btn-play btn-locked" disabled>
+        <span>Скоро</span>
+        <span>🔒</span>
+      </button>
+    </div>
+    <div class="footer">
+      Архив пополняется каждый месяц • Карточный Детектив
+    </div>
+  </div>
+  <script>
+    // Инициализация мостов MAX Bridge и Telegram
+    const app = window.WebApp || (window.Telegram && window.Telegram.WebApp);
+    if (app) {
+      try {
+        if (typeof app.ready === 'function') app.ready();
+        if (typeof app.expand === 'function') app.expand();
+        if (typeof app.lockOrientation === 'function') {
+          try { app.lockOrientation('portrait'); } catch(e) {}
+        }
+      } catch (e) {
+        console.warn('WebApp init:', e);
+      }
+    }
+    // Легкий виброотклик при клике на дело
+    function triggerHaptic() {
+      try {
+        if (app && app.HapticFeedback && typeof app.HapticFeedback.impactOccurred === 'function') {
+          app.HapticFeedback.impactOccurred('medium');
+        }
+      } catch(e) {}
+    }
+  </script>
 </body>
 </html>
