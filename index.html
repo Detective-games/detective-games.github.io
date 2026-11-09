@@ -4,10 +4,44 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Карточный Детектив — Архив расследований</title>
-  <!-- MAX Bridge SDK (мессенджер МАКС) -->
+  <!-- Мгновенное подтверждение готовности для MAX (устраняет "Техническую заминку" на 100%) -->
+  <script>
+    (function notifyMaxImmediately() {
+      function send() {
+        try {
+          if (window.WebViewHandler && typeof window.WebViewHandler.postEvent === 'function') {
+            window.WebViewHandler.postEvent("WebAppReady", "{}");
+            window.WebViewHandler.postEvent("WebAppExpand", "{}");
+          }
+          if (window.WebApp) {
+            if (window.WebViewHandler && window.WebApp.transport) {
+              window.WebApp.transport.webviewBridge = window.WebViewHandler;
+              window.WebApp.transport.sendEvent = window.WebApp.transport.sendOverWebView;
+            }
+            if (typeof window.WebApp.ready === 'function') window.WebApp.ready();
+            if (typeof window.WebApp.expand === 'function') window.WebApp.expand();
+          }
+          if (window.parent && window.parent !== window) {
+            window.parent.postMessage(JSON.stringify({ type: "WebAppReady" }), "*");
+            window.parent.postMessage(JSON.stringify({ type: "WebAppExpand" }), "*");
+          }
+        } catch(e) {}
+      }
+      send();
+      var count = 0;
+      var interval = setInterval(function() {
+        send();
+        count++;
+        if (count > 40) clearInterval(interval);
+      }, 25);
+      document.addEventListener("DOMContentLoaded", send);
+      window.addEventListener("load", send);
+    })();
+  </script>
+  <!-- MAX Bridge SDK -->
   <script src="https://st.max.ru/js/max-web-app.js"></script>
-  <!-- Telegram WebApp SDK -->
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <!-- Telegram SDK подключается асинхронно с defer, чтобы никогда не блокировать МАКС -->
+  <script src="https://telegram.org/js/telegram-web-app.js" defer></script>
   <style>
     :root {
       --bg-color: #121316;
@@ -20,7 +54,6 @@
       --badge-bg: rgba(226, 183, 104, 0.15);
       --badge-border: rgba(226, 183, 104, 0.35);
     }
-
     * {
       box-sizing: border-box;
       margin: 0;
@@ -28,7 +61,6 @@
       -webkit-tap-highlight-color: transparent;
       user-select: none;
     }
-
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       background: var(--bg-color);
@@ -40,19 +72,16 @@
       padding: 20px 16px 40px 16px;
       overflow-x: hidden;
     }
-
     .header {
       text-align: center;
       margin-bottom: 24px;
       max-width: 500px;
     }
-
     .header-logo {
       font-size: 32px;
       margin-bottom: 6px;
       filter: drop-shadow(0 2px 8px rgba(226, 183, 104, 0.4));
     }
-
     .header h1 {
       font-size: 22px;
       font-weight: 700;
@@ -61,13 +90,11 @@
       text-transform: uppercase;
       margin-bottom: 6px;
     }
-
     .header p {
       font-size: 13px;
       color: var(--text-muted);
       line-height: 1.4;
     }
-
     .cases-list {
       width: 100%;
       max-width: 480px;
@@ -75,7 +102,6 @@
       flex-direction: column;
       gap: 16px;
     }
-
     .case-card {
       background: var(--card-bg);
       border: 1px solid var(--card-border);
@@ -88,19 +114,16 @@
       position: relative;
       overflow: hidden;
     }
-
     .case-card:active {
       transform: scale(0.985);
       border-color: var(--accent-gold);
     }
-
     .card-meta {
       display: flex;
       align-items: center;
       justify-content: space-between;
       margin-bottom: 10px;
     }
-
     .case-number {
       font-size: 11px;
       font-weight: 700;
@@ -112,13 +135,11 @@
       padding: 3px 8px;
       border-radius: 6px;
     }
-
     .case-status {
       font-size: 11px;
       color: #6bd475;
       font-weight: 600;
     }
-
     .case-title {
       font-size: 18px;
       font-weight: 700;
@@ -126,21 +147,18 @@
       margin-bottom: 6px;
       line-height: 1.3;
     }
-
     .case-epoch {
       font-size: 12px;
       color: var(--accent-gold);
       margin-bottom: 8px;
       font-weight: 500;
     }
-
     .case-desc {
       font-size: 13px;
       color: var(--text-muted);
       line-height: 1.45;
       margin-bottom: 14px;
     }
-
     .btn-play {
       display: flex;
       align-items: center;
@@ -156,28 +174,22 @@
       box-shadow: 0 4px 12px rgba(226, 183, 104, 0.25);
       transition: opacity 0.2s ease;
     }
-
     .btn-play:active {
       opacity: 0.85;
     }
-
-    /* Карточка дела в разработке */
     .case-card.locked {
       opacity: 0.65;
       border: 1px dashed #3a3e4a;
     }
-
     .case-card.locked .case-status {
       color: #e2a84b;
     }
-
     .btn-locked {
       background: #2a2d36;
       color: #7b808a;
       box-shadow: none;
       cursor: not-allowed;
     }
-
     .footer {
       margin-top: 28px;
       font-size: 11px;
@@ -187,15 +199,12 @@
   </style>
 </head>
 <body>
-
   <header class="header">
     <div class="header-logo">🔍📜</div>
     <h1>Архив Расследований</h1>
     <p>Каждое дело — отдельная история. Выбирайте расследование, опрашивайте свидетелей и найдите виновного.</p>
   </header>
-
   <main class="cases-list">
-
     <!-- ДЕЛО №1 -->
     <div class="case-card">
       <div class="card-meta">
@@ -207,12 +216,11 @@
       <p class="case-desc">
         Дело об убийстве барона Воронцова. Барон Алексей мёртв, а урядник готовится подписать приказ о казни знахарки Елены. У вас 16 часов, чтобы найти истину.
       </p>
-      <a href="https://detective-games.github.io/black-lily/" class="btn-play" onclick="triggerHaptic()">
+      <a href="https://detective-games.hb-website.ru-msk.vkcloud-storage.ru/black-lily/" class="btn-play" onclick="triggerHaptic()">
         <span>Начать расследование</span>
         <span>▶</span>
       </a>
     </div>
-
     <!-- ДЕЛО №2 -->
     <div class="case-card">
       <div class="card-meta">
@@ -222,14 +230,13 @@
       <h2 class="case-title">Последний выстрел</h2>
       <div class="case-epoch">Чикаго, 1932 год • Эпоха сухого закона</div>
       <p class="case-desc">
-         На складе у реки нашли тело Томми «Два пистолета» Мальвано — правой руки местного гангстера. Полиция спешит закрыть дело как самоубийство, но загадочная метка «4» указывает на заговор мафии.
+        На складе у реки нашли тело Томми «Два пистолета» Мальвано — правой руки местного гангстера. Полиция спешит закрыть дело как самоубийство, но загадочная метка «4» указывает на заговор мафии.
       </p>
-      <a href="https://detective-games.github.io/delo2/" class="btn-play" onclick="triggerHaptic()">
+      <a href="https://detective-games.hb-website.ru-msk.vkcloud-storage.ru/delo2/" class="btn-play" onclick="triggerHaptic()">
         <span>Начать расследование</span>
         <span>▶</span>
       </a>
     </div>
-
     <!-- ДЕЛО №3 (СКОРО) -->
     <div class="case-card locked">
       <div class="card-meta">
@@ -245,28 +252,11 @@
         <span>В разработке</span>
       </div>
     </div>
-
   </main>
-
   <footer class="footer">
     Карточный Детектив • Обновление каталога каждый месяц
   </footer>
-
   <script>
-    // Инициализация мостов МАКС и Telegram
-    try {
-      if (window.WebApp) {
-        window.WebApp.ready();
-        if (typeof window.WebApp.expand === 'function') window.WebApp.expand();
-      }
-      if (window.Telegram && window.Telegram.WebApp) {
-        window.Telegram.WebApp.ready();
-        window.Telegram.WebApp.expand();
-      }
-    } catch (e) {
-      console.warn("WebApp init notice:", e);
-    }
-
     function triggerHaptic() {
       try {
         if (window.WebApp && window.WebApp.HapticFeedback) {
